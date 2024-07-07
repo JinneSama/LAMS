@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "LAMS",
+			"path": "."
+		},
+		{
+			"name": "phpqrcode",
+			"path": "../../../Users/Junnie Dev/Downloads/Compressed/QRCodeAttendance/QRCodeAttendance/phpqrcode"
+		}
+	],
+	"settings": {}
+}
