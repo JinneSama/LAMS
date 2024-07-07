@@ -1,0 +1,31 @@
+openssl
+
+openssl genrsa -aes256 -out private.key 2048
+openssl rsa -in private.key -out private.key
+openssl req -new -x509 -nodes -sha1 -key private.key -out certificate.crt -days 36500
+
+httpd.conf 
+
+LoadModule ssl_module modules/mod_ssl.so
+Include conf/extra/httpd-ssl.conf
+LoadModule socache_shmcb_module modules/mod_socache_shmcb.so
+
+httpd-ssl.conf
+
+DocumentRoot "C:/wamp64/www/"
+ServerName localhost:443
+ServerAdmin admin@example.com
+ErrorLog "${SRVROOT}/logs/error.log"
+TransferLog "${SRVROOT}/logs/access.log"
+
+SSLCertificateFile "${SRVROOT}/conf/key/certificate.crt"
+SSLCertificateKeyFile "${SRVROOT}/conf/key/private.key"
+
+
+<Directory "${INSTALL_DIR}/www">
+	Options Indexes FollowSymLinks MultiViews
+	AllowOverride All
+	Require all granted
+</Directory>
+
+unblock port 443,80
