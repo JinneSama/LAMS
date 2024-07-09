@@ -23,3 +23,8 @@ body {
     text-align: center;
     margin-top: 20px;
 }
+
+.username-label{
+    float: right;
+    color: white;
+}

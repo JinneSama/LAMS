@@ -55,10 +55,26 @@
 </head>
 <body>
 <div class="navbar">
-        <a href="index.html">Scanner</a>
+        <a href="index.php">Scanner</a>
         <a href="AddAttendee.php">Add Student</a>
         <a href="view_records.php">View Records</a>
         <a href="view_attendance.php">View Attendance</a>
+        <a href="logout.php" style="float: right;">Logout</a>
+        <?php
+            session_start();
+
+            if (!isset($_SESSION['username'])) {
+                header("Location: login.html");
+                exit;
+            }else{
+                
+                echo '<a href="" style="float: right; pointer-events: none;">' . $_SESSION['username'] . '</a>';
+                if(isset($_SESSION['usertype'])){
+                    if($_SESSION['usertype'] == "Administrator")
+                        echo '<a href="NewUser.php">Add User</a>';
+                }
+            }
+        ?>
     </div>
 <h2 style="text-align: center;">Attendee Records</h2>
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Registration Form</title>
+<title>Add New User</title>
 <link rel="stylesheet" href="styles/navbar_style.css">
 <style>
     body{
@@ -17,6 +17,8 @@
         border: 1px solid #ccc;
         border-radius: 8px;
         font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
     }
     label, select, input {
         display: block;
@@ -31,6 +33,7 @@
         cursor: pointer;
         float: left;
         margin-right: 10px;
+        width: 100%;
     }
     input[type="button"]:hover, input[type="submit"]:hover {
         background-color: #45a049;
@@ -93,77 +96,18 @@ function previewImage(event) {
             }
         ?>
     </div>
-<form action="submit_form.php" method="post" enctype="multipart/form-data">
-    <div class="image-preview" id="image-preview"></div>
+<form action="saveUser.php" method="post">
+    <label for="username">First Name:</label>
+    <input type="text" id="username" name="username" required>
 
-    <label for="image">Choose Student Photo:</label>
-    <input type="file" id="image" name="image" onchange="previewImage(event)" accept="image/*">
+    <label for="password">Middle Name:</label>
+    <input type="text" id="password" name="password">
 
-    <label for="firstname">First Name:</label>
-    <input type="text" id="firstname" name="firstname" required>
-
-    <label for="middlename">Middle Name:</label>
-    <input type="text" id="middlename" name="middlename">
-
-    <label for="lastname">Last Name:</label>
-    <input type="text" id="lastname" name="lastname" required>
-
-    <label for="nameextension">Name Extension:</label>
-    <input type="text" id="nameextension" name="nameextension">
-
-    <label for="course">Course:</label>
-    <select id="course" name="course" required>
-        <?php
-        
-        $servername = "localhost";
-        $username = "root";
-        $password = "root";
-        $dbname = "LAMS";
-
-        $conn = new mysqli($servername, $username, $password, $dbname);
-
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-
-        $sql = "SELECT * FROM Course";
-        $result = $conn->query($sql);
-
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                echo '<option value="' . $row["Id"] . '">' . $row["CourseName"] . '</option>';
-            }
-        } else {
-            echo '<option value="">No courses available</option>';
-        }
-
-        $conn->close();
-        ?>
+    <label for="UserType">User Type:</label>
+    <select id="UserType" name="UserType" required>
+        <option value="Administrator">Administrator</option>
+        <option value="User">User</option>
     </select>
 
-    <label for="dateenrolled">Date Enrolled:</label>
-    <input type="date" id="dateenrolled" name="dateenrolled" required>
-
-    <label for="schoolId">School ID:</label>
-    <input type="text" id="schoolId" name="schoolId" required>
-
-    <div style="overflow: auto;">
-        <input type="submit" value="Submit">
-        <input type="button" value="Clear Form" onclick="clearForm()">
-    </div>
+    <input type="submit" value="Submit">
 </form>
-
-<script>
-    function clearForm() {
-        document.getElementById("firstname").value = "";
-        document.getElementById("middlename").value = "";
-        document.getElementById("lastname").value = "";
-        document.getElementById("nameextension").value = "";
-        document.getElementById("course").value = "";
-        document.getElementById("dateenrolled").value = "";
-        document.getElementById("schoolId").value = "";
-    }
-</script>
-
-</body>
-</html>
