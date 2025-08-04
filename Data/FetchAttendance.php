@@ -9,7 +9,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Optional: implement server-side filtering, sorting, paging here using $_GET parameters
+$filter = isset($_GET['filter']) ? $_GET['filter'] : null;
+
 $sql = "SELECT C.Id , 
                CONCAT(C.FirstName, ' ', C.MiddleName, ' ', C.LastName, ' ', C.NameExt) AS fullName,
                B.TypeName, 
@@ -17,6 +18,10 @@ $sql = "SELECT C.Id ,
         FROM Attendance A 
         INNER JOIN AttendanceType B ON A.AttendanceType = B.Id 
         INNER JOIN Attendee C ON A.AttendeeId = C.Id";
+
+if ($filter == 1) {
+    $sql .= " WHERE DATE(A.DateAttended) = CURDATE()";
+}
 
 $result = $conn->query($sql);
 

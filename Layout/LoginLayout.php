@@ -12,7 +12,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="../dist/css/Login/adminlte.min.css">
 
-<body class="login-page" style="min-height: 496.781px; ">
+<body class="login-page" style="min-height: 496.781px; background-color: #800000;">
 
 <?= $content ?>
 

@@ -4,67 +4,65 @@ include 'DbConnect.php';
 $conn = getDbConnection();
 
 $method = $_SERVER['REQUEST_METHOD'];
-$raw = file_get_contents("php://input");
-$data = json_decode($raw, true);
-$action = $data['action'] ?? '';
 
-if ($method === 'GET') {
-    echo json_encode([]);
-    exit;
-}
+if ($method === 'POST') {
+    $action = $_POST['action'] ?? '';
+    $id = $_POST['id'] ?? null;
 
-// Insert
-if ($action === 'insert') {
-    $d = $data['value'];
+    $firstName = $_POST['first_name'];
+    $middleName = $_POST['middle_name'];
+    $lastName = $_POST['last_name'];
+    $nameExt = $_POST['name_ext'];
+    $courseId = $_POST['course_id'];
+    $year = $_POST['year'];
+    $dateEnrolled = $_POST['date_enrolled'];
+    $schoolId = $_POST['school_id'];
+    $timestamp = strtotime($dateEnrolled);
+    $formattedDate = date('Y-m-d H:i:s', $timestamp);
 
-    $timestamp = strtotime($d['date_enrolled']);
-    if (!$timestamp) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid date format: ' . $d['date_enrolled']]);
+    // Handle image
+    $imagePath = null;
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/../uploads/';
+        if (!file_exists($uploadDir)) mkdir($uploadDir, 0755, true);
+        $filename = time() . '_' . basename($_FILES['photo']['name']);
+        $targetPath = $uploadDir . $filename;
+        if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
+            $imagePath = 'uploads/' . $filename;
+        }
+    }
+
+    if ($action === 'insert') {
+        $stmt = $conn->prepare("INSERT INTO Attendee (FirstName, MiddleName, LastName, NameExt, Course, Year, DateEnrolled, SchoolId, ImagePath) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssiisss", $firstName, $middleName, $lastName, $nameExt, $courseId, $year, $formattedDate, $schoolId, $imagePath);
+        $stmt->execute();
+
+        echo json_encode(['id' => $stmt->insert_id]);
         exit;
     }
 
-    $newDate = date('Y-m-d H:i:s', $timestamp);
+    if ($action === 'update') {
+        $stmt = $conn->prepare("UPDATE Attendee SET FirstName=?, MiddleName=?, LastName=?, NameExt=?, Course=?, Year=?, DateEnrolled=?, SchoolId=?, ImagePath=IFNULL(?, ImagePath) WHERE Id=?");
+        $stmt->bind_param("ssssiisssi", $firstName, $middleName, $lastName, $nameExt, $courseId, $year, $formattedDate, $schoolId, $imagePath, $id);
+        $stmt->execute();
 
-    $stmt = $conn->prepare("INSERT INTO Attendee (FirstName, MiddleName, LastName, NameExt, Course, Year, DateEnrolled, SchoolId, ImagePath) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssiisss", $d['first_name'], $d['middle_name'], $d['last_name'], $d['name_ext'], $d['course_id'], $d['year'], $newDate, $d['school_id'], $d['image_path']);
-    $stmt->execute();
-
-    echo json_encode(array_merge($d, ['id' => $stmt->insert_id]));
-    exit;
-}
-
-
-// Update
-if ($action === 'update') {
-    $d = $data['value'];
-    $timestamp = strtotime($d['date_enrolled']);
-    if (!$timestamp) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid date format: ' . $d['date_enrolled']]);
+        echo json_encode(['id' => $id]);
         exit;
     }
-
-    $newDate = date('Y-m-d H:i:s', $timestamp);
-
-    $stmt = $conn->prepare("UPDATE Attendee SET FirstName=?, MiddleName=?, LastName=?, NameExt=?, Course=?, Year=?, DateEnrolled=?, SchoolId=?, ImagePath=? WHERE Id=?");
-    $stmt->bind_param("ssssiisssi", $d['first_name'], $d['middle_name'], $d['last_name'], $d['name_ext'], $d['course_id'], $d['year'], $newDate, $d['school_id'], $d['image_path'], $d['id']);
-    $stmt->execute();
-    if ($stmt->error) {
-        error_log("MySQL Error: " . $stmt->error);
-    }
-    echo json_encode($d);
-    exit;
 }
 
-// Delete
-if ($action === 'remove') {
-    $id = $data['key'];
-    $stmt = $conn->prepare("DELETE FROM Attendee WHERE Id=?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    echo json_encode(['id' => $id]);
-    exit;
+if ($method === 'DELETE') {
+    $raw = file_get_contents("php://input");
+    $data = json_decode($raw, true);
+    $id = $data['key'] ?? null;
+
+    if ($id) {
+        $stmt = $conn->prepare("DELETE FROM Attendee WHERE Id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        echo json_encode(['id' => $id]);
+        exit;
+    }
 }
 
 http_response_code(400);
